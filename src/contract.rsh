@@ -12,13 +12,13 @@ export const main = Reach.App(() => {
 const user1 = Participant("user1", {
   ...Persons,
   funds: UInt,
-  deadline: UInt, 
-  
+  deadline: UInt,
+
 });
 const user2 = Participant("user2", {
   ...Persons,
   accepFunds: Fun([UInt], Null),   ///acceptFunds= (funds) => {do wahtsoever with funds}
-  
+
 });
 const user3 = Participant("user3", {
   ...Persons,
@@ -71,8 +71,8 @@ commit();
 
 //for user1 only
 user1.only(()=> {
-  const funds = declassify(interact.funds); 
-  const deadline = declassify(interact.deadline) 
+  const funds = declassify(interact.funds);
+  const deadline = declassify(interact.deadline)
   const ideas = declassify(interact.viewIdeas(idea1, idea2));
   const vote1 = declassify(interact.voteIdea());
   assume(vote1 == idea1 || vote1 ==idea2)
@@ -82,9 +82,9 @@ user1.only(()=> {
   require(vote1 == idea1 || vote1 ==idea2 );
   commit();
   user1.pay(funds)
-  //must send out 
+  //must send out
   commit();
-  
+
   //for user2 only
 user2.only(()=> {
   interact.accepFunds(funds);
@@ -120,9 +120,9 @@ require(vote3 == idea1 || vote3 ==idea2)
 
 
 //Time to vote
-if(vote1 == idea1 && vote2 == idea1){transfer( funds * 3).to(Proposer1)} 
+if(vote1 == idea1 && vote2 == idea1){transfer( funds * 3).to(Proposer1)}
 else if(vote1 == idea2 && vote2 == idea2){transfer(funds * 3 ).to(Proposer2)}
-else if(vote1 == idea1 && vote3 == idea1){transfer(funds * 3 ).to(Proposer1)} 
+else if(vote1 == idea1 && vote3 == idea1){transfer(funds * 3 ).to(Proposer1)}
 else if(vote1 == idea2 && vote3 == idea2){transfer(funds * 3 ).to(Proposer2)}
 else if(vote2 == idea2 && vote3 == idea2){transfer(funds * 3 ).to(Proposer2)}
 else if(vote2 == idea1 && vote3 == idea1){transfer(funds * 3 ).to(Proposer1)}

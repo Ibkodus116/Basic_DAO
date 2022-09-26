@@ -23,7 +23,7 @@ although we are not limited to number of users but due to the limited time avail
 
 - Investor 2: This participant also do the same as the initial investor, but will only need the contract address after which they cast thier vote.
 
-- Investor 3: This participant also do the same as the investor 1 and cast thier vote.
+- Investor 3: This participant also do the same as the investor 2 and cast thier vote.
 
 After the whole casting of vote they will be an alert from the browser showing the idea with the highest vote and funds are sent to the participant who proposed the idea.
 
@@ -36,7 +36,7 @@ npx create-react-app basic-dao
 ```
 wait for the command to run this will bootstrap a react template for you. Next, navigate to the src directory in terminal this is where we will be writing our reach code.
 ## Reach Setup
-To be sure you have reach installed and working fine run the command below if not check the [Requirement](https://github.com/Ibkodus116/Basic_DAO/blob/b30478b0278058fe11a23ea49b2c8935b811270a/README.md#L4) section to learn how
+To be sure you have reach installed and working fine run the command below if not check the [Requirement](#requirement) section to learn how
 
 ```
 reach version
@@ -58,7 +58,9 @@ We are making use of VS code so right in vs code in the src folder, please creat
 ```
 this will be our first line of code in the index.rsh file, this simply signifies that this the particular file is a reach file and it specifies the version of reach we are curently using. then we create an interface for our basic interaction which will in turn interact with the Front end:
 
-```
+
+!!!
+```js
 const Persons = {
   informTimeout: Fun([], Null),
   viewIdeas:  Fun([Bytes(10), Bytes(10)], Null),
@@ -66,10 +68,19 @@ const Persons = {
   seeOutcome: Fun([Bytes(10), Bytes(10), Bytes(10)], Null)
 }
 ```
+
+now we proceed to implementing the logic of our Reach file, all reach programs have a main function they export, this is what mine looks like below:
+```js
+export const main = Reach.App(() => {
+  exit();
+  })
+```
+the main function that's exported is simply the function returned from the function call of `Reach.App()`, this is where our app logic will live. the other codes i will be writting will live withing this function.
+
 Now let define the interface for responsibilities that are particular to each participant:
 
 below is the interface for the [initial investor](#particiapants-activities)
-```
+```js
 const user1 = Participant("user1", {
   ...Persons,
   funds: UInt,
@@ -77,23 +88,24 @@ const user1 = Participant("user1", {
 
 });
 ```
-below is the interface for [investor 1](#particiapants-activities)
-```
+
+below is the interface for [investor 2](#particiapants-activities)
+```js
 const user2 = Participant("user2", {
   ...Persons,
-  accepFunds: Fun([UInt], Null),   ///acceptFunds= (funds) => {do wahtsoever with funds}
-
+  accepFunds: Fun([UInt], Null),
 })
 ```
+
 below is the interface for [Investor 3](#particiapants-activities)
-```
+```js
 const user3 = Participant("user3", {
   ...Persons,
-  accepFunds: Fun([UInt], Null),   ///acceptFunds= (funds) => {do wahtsoever with funds}
+  accepFunds: Fun([UInt], Null),
 });
 ```
 Below is the interface for the [deployer](#particiapants-activities)
-```
+```js
 const Proposer1 = Participant("Proposer1", {
   proposeIdea: Fun([], Bytes(10)),
   seeOutcome: Fun([Bytes(10), Bytes(10), Bytes(10)], Null)
@@ -108,5 +120,247 @@ const Proposer2 = Participant("Proposer2", {
   seeOutcome: Fun([Bytes(10), Bytes(10), Bytes(10)], Null)
 })
 ```
+The three investors (initial investor, investor 2 and Investor 3)inherit all the attribute from `Persons` created earlier. Both the deployer and the proposer where allocated 10 Byte memory space which means they're limited to 10 character.
 
-both the deployer and the proposer where allocated 10 Byte memory space which means they're limited to 10 character. the three investor<code> inherit </code>
+!!!
+```js
+const informTimeout = () => {
+  each([user1, user2, user3], ()=> {
+    interact.informTimeout();
+  })
+};
+```
+
+!!!
+```js
+const seeOutcome = (fVote, sVote, tVote) => {
+  each([user1, user2, user3, Proposer1, Proposer2], ()=> {
+    interact.seeOutcome(fVote, sVote, tVote);
+  })
+};
+```
+At this point we are accepting the idea from the Deployer which the first proposal
+
+```js
+Proposer1.only(() => {
+  const idea1 = declassify(interact.proposeIdea());
+});
+Proposer1.publish(idea1);
+
+commit();
+```
+At this point we are accepting the idea from the proposer which the second proposal
+
+```js
+Proposer2.only(() => {
+  const idea2 = declassify(interact.proposeIdea());
+})
+
+Proposer2.publish(idea2);
+
+commit();
+```
+After accepting both proposals we now have two ideas in the contract that's about to be voted for, what we need to do next is to pay token into the contract in other to vote.
+
+This is for user 1 i.e the initial investor we will be giving this user the ability to input specific amount he wants to pay into the contract. Making sure we keep track of this user vote and also send funds to the contract wallet so their vote can also be casted.
+```js
+user1.only(()=> {
+  const funds = declassify(interact.funds);
+  const deadline = declassify(interact.deadline)
+  const ideas = declassify(interact.viewIdeas(idea1, idea2));
+  const vote1 = declassify(interact.voteIdea());
+  assume(vote1 == idea1 || vote1 ==idea2)
+  assert(vote1 == idea1 || vote1 ==idea2);
+});
+
+  user1.publish(funds, deadline, vote1);
+  require(vote1 == idea1 || vote1 ==idea2 );
+  commit();
+  user1.pay(funds)
+  commit();
+```
+
+This is for user2 i.e investor 2 we keep track of this user vote and making sure we keep track of this user vote and also send funds to the contract wallet so their vote can also be casted.
+```js
+user2.only(()=> {
+  interact.accepFunds(funds);
+  const ideas = declassify(interact.viewIdeas(idea1, idea2));
+  const vote2 = declassify(interact.voteIdea());
+  assume(vote2 == idea1 || vote2 ==idea2);
+  assert(vote2 == idea1 || vote2 ==idea2);
+});
+
+user2.publish(vote2);
+require(vote2 == idea1 || vote2 == idea2)
+commit();
+user2.pay(funds)
+  .timeout(relativeTime(deadline), () => closeTo(user1, informTimeout));
+  commit();
+user2.publish();
+commit();
+```
+
+This is for user3 i.e investor 3 we keep track of this user vote and making sure we keep track of this user vote and also send funds to the contract wallet so their vote can also be casted.
+```js
+user3.only(()=> {
+  interact.accepFunds(funds);
+  const ideas = declassify(interact.viewIdeas(idea1, idea2));
+  const vote3 = declassify(interact.voteIdea());
+  assume(vote3 == idea1 || vote3 == idea2);
+  assert(vote3 == idea1 || vote3 == idea2);
+});
+
+user3.pay(funds)
+  .timeout(relativeTime(deadline), () => closeTo(user1, informTimeout));
+  commit();
+user3.publish(vote3);
+require(vote3 == idea1 || vote3 ==idea2)
+```
+
+Now we need to check and compare all the votes to know which idea we will be funding the code block bellow does that easily.
+```js
+if(vote1 == idea1 && vote2 == idea1){transfer( funds * 3).to(Proposer1)}
+else if(vote1 == idea2 && vote2 == idea2){transfer(funds * 3 ).to(Proposer2)}
+else if(vote1 == idea1 && vote3 == idea1){transfer(funds * 3 ).to(Proposer1)}
+else if(vote1 == idea2 && vote3 == idea2){transfer(funds * 3 ).to(Proposer2)}
+else if(vote2 == idea2 && vote3 == idea2){transfer(funds * 3 ).to(Proposer2)}
+else if(vote2 == idea1 && vote3 == idea1){transfer(funds * 3 ).to(Proposer1)}
+commit();
+```
+
+The result is then been sent out on this line of code.
+```js
+seeOutcome(vote1, vote2, vote3);
+```
+
+## See the full Rsh file below
+
+```js
+'reach 0.1';
+
+
+const Persons = {
+  informTimeout: Fun([], Null),
+  viewIdeas:  Fun([Bytes(10), Bytes(10)], Null),
+  voteIdea: Fun([], Bytes(10)),
+  seeOutcome: Fun([Bytes(10), Bytes(10), Bytes(10)], Null)
+}
+
+export const main = Reach.App(() => {
+const user1 = Participant("user1", {
+  ...Persons,
+  funds: UInt,
+  deadline: UInt,
+
+});
+const user2 = Participant("user2", {
+  ...Persons,
+  accepFunds: Fun([UInt], Null),
+
+});
+const user3 = Participant("user3", {
+  ...Persons,
+  accepFunds: Fun([UInt], Null),
+});
+
+const Proposer1 = Participant("Proposer1", {
+  proposeIdea: Fun([], Bytes(10)),
+  seeOutcome: Fun([Bytes(10), Bytes(10), Bytes(10)], Null)
+});
+
+const Proposer2 = Participant("Proposer2", {
+  proposeIdea: Fun([], Bytes(10)),
+  seeOutcome: Fun([Bytes(10), Bytes(10), Bytes(10)], Null)
+})
+init();
+
+
+
+
+const informTimeout = () => {
+  each([user1, user2, user3], ()=> {
+    interact.informTimeout();
+  })
+};
+const seeOutcome = (fVote, sVote, tVote) => {
+  each([user1, user2, user3, Proposer1, Proposer2], ()=> {
+    interact.seeOutcome(fVote, sVote, tVote);
+  })
+};
+
+
+
+Proposer1.only(() => {
+  const idea1 = declassify(interact.proposeIdea());
+});
+Proposer1.publish(idea1);
+
+commit();
+
+Proposer2.only(() => {
+  const idea2 = declassify(interact.proposeIdea());
+})
+
+Proposer2.publish(idea2);
+
+commit();
+
+
+user1.only(()=> {
+  const funds = declassify(interact.funds);
+  const deadline = declassify(interact.deadline)
+  const ideas = declassify(interact.viewIdeas(idea1, idea2));
+  const vote1 = declassify(interact.voteIdea());
+  assume(vote1 == idea1 || vote1 ==idea2)
+  assert(vote1 == idea1 || vote1 ==idea2);
+});
+  user1.publish(funds, deadline, vote1);
+  require(vote1 == idea1 || vote1 ==idea2 );
+  commit();
+  user1.pay(funds)
+  commit();
+
+user2.only(()=> {
+  interact.accepFunds(funds);
+  const ideas = declassify(interact.viewIdeas(idea1, idea2));
+  const vote2 = declassify(interact.voteIdea());
+  assume(vote2 == idea1 || vote2 ==idea2);
+  assert(vote2 == idea1 || vote2 ==idea2);
+});
+user2.publish(vote2);
+require(vote2 == idea1 || vote2 == idea2)
+commit();
+user2.pay(funds)
+  .timeout(relativeTime(deadline), () => closeTo(user1, informTimeout));
+  commit();
+user2.publish();
+commit();
+
+
+user3.only(()=> {
+  interact.accepFunds(funds);
+  const ideas = declassify(interact.viewIdeas(idea1, idea2));
+  const vote3 = declassify(interact.voteIdea());
+  assume(vote3 == idea1 || vote3 == idea2);
+  assert(vote3 == idea1 || vote3 == idea2);
+});
+
+user3.pay(funds)
+  .timeout(relativeTime(deadline), () => closeTo(user1, informTimeout));
+  commit();
+user3.publish(vote3);
+require(vote3 == idea1 || vote3 ==idea2)
+
+
+if(vote1 == idea1 && vote2 == idea1){transfer( funds * 3).to(Proposer1)}
+else if(vote1 == idea2 && vote2 == idea2){transfer(funds * 3 ).to(Proposer2)}
+else if(vote1 == idea1 && vote3 == idea1){transfer(funds * 3 ).to(Proposer1)}
+else if(vote1 == idea2 && vote3 == idea2){transfer(funds * 3 ).to(Proposer2)}
+else if(vote2 == idea2 && vote3 == idea2){transfer(funds * 3 ).to(Proposer2)}
+else if(vote2 == idea1 && vote3 == idea1){transfer(funds * 3 ).to(Proposer1)}
+commit();
+seeOutcome(vote1, vote2, vote3);
+
+  exit();
+  });
+```
