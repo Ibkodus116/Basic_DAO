@@ -12,7 +12,7 @@ the purpose of this workshop is to do walk through of my code on my project Basi
 
 Reach has a very supportive and ready to help community if you ever get stocked just put up the question and you will definately get an answer. Join Reach [Dicord Server](https://discord.com/invite/XJHFzSsc) now.
 
-# Particiapants Activities.
+# Particiapants Activities
 although we are not limited to number of users but due to the limited time available, i made use of 5 particiapnts namely Deployer, Proposer, Initial Investor, Investor 2, Investor 3, two partipant proposes idea to be voted on while the other 3 particiapnt are member of the DAO who votes for the best idea. their Activies are:
 
 - Deployer: This is the participant who initiates the protocol and proposes the first idea.
@@ -68,7 +68,7 @@ const Persons = {
 ```
 Now let define the interface for responsibilities that are particular to each participant:
 
-This is the interface for the initial investor
+below is the interface for the [initial investor](#particiapants-activities)
 ```
 const user1 = Participant("user1", {
   ...Persons,
@@ -77,7 +77,7 @@ const user1 = Participant("user1", {
 
 });
 ```
-This is the interface for investor 1
+below is the interface for [investor 1](#particiapants-activities)
 ```
 const user2 = Participant("user2", {
   ...Persons,
@@ -85,14 +85,14 @@ const user2 = Participant("user2", {
 
 })
 ```
-This is the interface for [Investor](https://github.com/Ibkodus116/Basic_DAO/blob/b2f1e6015c2adb0d86d9bc7f30ca87adcbf9815d/README.md#L24)
+below is the interface for [Investor 3](#particiapants-activities)
 ```
 const user3 = Participant("user3", {
   ...Persons,
   accepFunds: Fun([UInt], Null),   ///acceptFunds= (funds) => {do wahtsoever with funds}
 });
 ```
-Below is the interface for the [deployer perma](https://github.com/Ibkodus116/Basic_DAO/blob/0a689652e09fb3e18d08e5ca960d23ce81f0191e/README.md#L20)
+Below is the interface for the [deployer](#particiapants-activities)
 ```
 const Proposer1 = Participant("Proposer1", {
   proposeIdea: Fun([], Bytes(10)),
@@ -100,11 +100,13 @@ const Proposer1 = Participant("Proposer1", {
 });
 ```
 
-Below is the interface for the [proposer head](https://github.com/Ibkodus116/Basic_DAO/blob/main/README.md#L20)
+Below is the interface for the [proposer](#particiapants-activities)
 
-```
+```js
 const Proposer2 = Participant("Proposer2", {
   proposeIdea: Fun([], Bytes(10)),
   seeOutcome: Fun([Bytes(10), Bytes(10), Bytes(10)], Null)
 })
 ```
+
+both the deployer and the proposer where allocated 10 Byte memory space which means they're limited to 10 character. the three investor<code> inherit </code>
