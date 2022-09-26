@@ -85,7 +85,7 @@ const user2 = Participant("user2", {
 
 })
 ```
-This is the interface for [investor 2 PM]([Investor](https://github.com/Ibkodus116/Basic_DAO/blob/0a689652e09fb3e18d08e5ca960d23ce81f0191e/README.md#L24))
+This is the interface for [Investor](https://github.com/Ibkodus116/Basic_DAO/blob/b2f1e6015c2adb0d86d9bc7f30ca87adcbf9815d/README.md#L24)
 ```
 const user3 = Participant("user3", {
   ...Persons,
