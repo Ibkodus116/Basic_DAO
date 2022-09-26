@@ -85,14 +85,14 @@ const user2 = Participant("user2", {
 
 })
 ```
-This is the interface for investor 2
+This is the interface for [investor 2 PM]([Investor](https://github.com/Ibkodus116/Basic_DAO/blob/0a689652e09fb3e18d08e5ca960d23ce81f0191e/README.md#L24))
 ```
 const user3 = Participant("user3", {
   ...Persons,
   accepFunds: Fun([UInt], Null),   ///acceptFunds= (funds) => {do wahtsoever with funds}
 });
 ```
-Below is the interface for the [deployer](https://github.com/Ibkodus116/Basic_DAO/blob/b30478b0278058fe11a23ea49b2c8935b811270a/README.md#L18)
+Below is the interface for the [deployer perma](https://github.com/Ibkodus116/Basic_DAO/blob/0a689652e09fb3e18d08e5ca960d23ce81f0191e/README.md#L20)
 ```
 const Proposer1 = Participant("Proposer1", {
   proposeIdea: Fun([], Bytes(10)),
@@ -100,7 +100,7 @@ const Proposer1 = Participant("Proposer1", {
 });
 ```
 
-Below is the interface for the [deployer](https://github.com/Ibkodus116/Basic_DAO/blob/b30478b0278058fe11a23ea49b2c8935b811270a/README.md#L20)
+Below is the interface for the [proposer head](https://github.com/Ibkodus116/Basic_DAO/blob/main/README.md#L20)
 
 ```
 const Proposer2 = Participant("Proposer2", {
