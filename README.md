@@ -1,5 +1,5 @@
 # Workshop
-the purpose of this workshop is to do a walkthrough of my code on my project Basic DAO in UMOJA Bounty HACK II. In simple terms, Basic DAO means a basic Decentralized Autonomous Organization. that is an organisation where decision-making is not central, instead the member of the organisation (also called DAO) is solely in charge of decsion making mostly by voting. For my project, votes are being cast on which particular idea should the DAO fund, the idea with the highest vote receives the funds once the result is in. Do you want to know how I was able to achieve this the obstacle faced and all? You can through my <a href="https://medium.com/@Ibkodus116/basic-dao-umoja-iii-bounty-hack-team-56-a3bf972b384d" target="_blank">article</a>.
+the purpose of this workshop is to do a walkthrough of my code on my project Basic DAO in UMOJA Bounty HACK II. In simple terms, Basic DAO means a basic Decentralized Autonomous Organization. that is an organisation where decision-making is not central, instead the member of the organisation (also called DAO) is solely in charge of decision making mostly by voting. For my project, votes are being cast on which particular idea should the DAO fund, the idea with the highest vote receives the funds once the result is in. Do you want to know how I was able to achieve this the obstacle faced and all? You can through my <a href="https://medium.com/@Ibkodus116/basic-dao-umoja-iii-bounty-hack-team-56-a3bf972b384d" target="_blank">article</a>.
 
 # Requirement
 ## These are the Basic Requirements/knowledge you are expected to have before going through this workshop.
@@ -58,8 +58,6 @@ We are making use of VS code so right in vs code in the src folder, please creat
 ```
 this will be our first line of code in the index.rsh file, this simply signifies that this particular file is a reach file and it specifies the version of reach we are currently using. then we create an interface for our basic interaction which will in turn interact with the Front end:
 
-
-!!!
 ```js
 const Persons = {
   informTimeout: Fun([], Null),
@@ -75,7 +73,7 @@ export const main = Reach.App(() => {
   exit();
   })
 ```
-the main function that's exported is simply the function returned from the function call of `Reach.App()`, this is where our app logic will live. the other codes I will be writing will live within this function.
+the main function that's exported is simply the function returned from the function call of `Reach.App()`, this is where the whole logic of our app will live. the other codes I will be writing will live within this function.
 
 Now let's define the interface for responsibilities that are particular to each participant:
 
@@ -122,7 +120,8 @@ const Proposer2 = Participant("Proposer2", {
 ```
 The three investors (initial investor, investor 2 and Investor 3)inherit all the attributes from `Persons` created earlier. Both the deployer and the proposer were allocated 10 Byte memory space which means they're limited to 10 characters.
 
-!!!
+We create two functions `informTimeOut` and `seeOutcome`, the `informTimeOut` function is called whenever a call to publish or pay times out and it basically alerts the frontend for all the users that a timeout has happened. We also create the function `seeOutcome`, this function is what enables all participants to see the outcome of the votes that were made in the contract, this function is called at the end of the contract, below is the implementation for both functions
+
 ```js
 const informTimeout = () => {
   each([user1, user2, user3], ()=> {
@@ -131,7 +130,7 @@ const informTimeout = () => {
 };
 ```
 
-!!!
+
 ```js
 const seeOutcome = (fVote, sVote, tVote) => {
   each([user1, user2, user3, Proposer1, Proposer2], ()=> {
@@ -160,7 +159,7 @@ Proposer2.publish(idea2);
 
 commit();
 ```
-After accepting both proposals we now have two ideas in the contract that are about to be voted for, what we need to do next is to pay token into the contract in other to vote.
+After accepting both proposals we now have two ideas in the contract that are about to be voted for, what we need to do next is to pay tokens into the contract in other to vote.
 
 This is for user 1 i.e the initial investor we will be giving this user the ability to input a specific amount he wants to pay into the contract. We make sure we keep track of this user vote and also send funds to the contract wallet so their vote can also be cast.
 ```js
@@ -365,3 +364,747 @@ seeOutcome(vote1, vote2, vote3);
   });
 ```
 
+# Interaction With The React Frontend
+
+## Step 1: install the reach stdlib package
+The first thing we need to do is to install the reach stdlib library in our react project, for this project i used the version `^0.1.11-rc.0`, so simply run the below in the root directory of your project
+```bash
+npm install @reach-sh/stdlib@^0.1.11-rc.0
+```
+Wait a bit for the package to get installed and then you're all set up.
+## Step 2: styling
+We use some very simple css for our styling in this project that i will not be going over, you can simply copy the css below into the `App.css` file of your react project
+```
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.my-body{
+  border: #61dafb solid 3px;
+  width: 50%;
+  height: 500px;
+  margin: auto;
+  padding: 10px;
+  margin-top: 200px;
+}
+.action-button{
+  border-radius: 10px;
+  background-color: #61dafb;
+  border: none;
+  padding: 10px;
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  color: white;
+  height: 40px;
+  width: 30%;
+  font-weight: bold
+}
+.action-input{
+  border: 2px solid #61dafb;
+  border-radius: 10px;
+  background-color: white;
+  margin: auto;
+  margin-top: 20px;
+  height: 30px;
+  width: 30%;
+  display: block;
+  padding: 5px;
+}
+.list-of-ideas{
+  color: #61dafb;
+  padding: 10px;
+  display: block;
+  margin: auto;
+  margin-top: 20px;
+  height: 40px;
+  width: 30%;
+  font-weight: bold
+}
+.info-text{
+  margin:auto;
+  width: 20%
+}
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+```
+##  Step 3: Deployer Participant Screen
+We have to write the code that will enable our deployer to deploy the reach contract from the frontend, a major prerequisite for this is to make sure that you have compiled your contract.rsh file, I compiled mine and then copied the compiled output into a file called contract.mjs in my src directory, you can look at that [here](https://github.com/Ibkodus116/Basic_DAO/blob/main/src/contract.mjs).
+
+Create a file, let's call it `DeployerScreen.js`
+the first lines of code we need in our file are the imports that we will be using, you can find them below:
+```js
+import logo from './logo.svg';
+import './App.css';
+import './loader.css'
+import * as backend from "./contract.mjs";
+import { useState } from 'react';
+```
+a major import to note is the compiled contract output we import as `backend` in the code above.
+The next thing is our deploy function, which will be rendered to the browser, let's call it `DeployerScreen`:
+```js
+function DeployerScreen(props){
+
+}
+```
+The function is presently empty but this function ought to contain the logic to deploy our contract with the frontend interaction in the browser. Now, we need 3 state variables for this react component:
+
+1. the idea that the first proposer/deployer sets
+2. the contract id that will be generated when the contract has been deployed
+3. A state variable that dictates when a loading bar should be displayed on the webpage
+
+Below is the implementation of our state variables in our DeployerScreen function
+
+```js
+function DeployScreen(props){
+        const [idea, setIdea] = useState("");
+    const [contractId, setContractId] = useState(undefined);
+    const [loading, setLoading] = useState(false);
+}
+```
+Now, we need to create a function that deploys our contract with the state variable `idea`, and gets our contract id so other participants can connect to our contract, let's call this function `handleDeployClicked`
+```js
+function DeployScreen(props){
+    const [idea, setIdea] = useState("");
+    const [contractId, setContractId] = useState(undefined);
+    const [loading, setLoading] = useState(false);
+
+    function DeployScreen(props) {
+    console.log(props)
+
+    const [idea, setIdea] = useState("");
+    const [contractId, setContractId] = useState(undefined);
+    const [loading, setLoading] = useState(false);
+
+
+    const handleDeployClicked = async() => {
+        setLoading(true);
+        const {account, stdlib} = await props.connectToWallet();
+        const ctc = account.contract(backend);
+        ctc.getInfo().then((info) => {
+            setContractId(info.toNumber());
+        });
+        await ctc.p.Proposer1({
+            proposeIdea: ()=>{
+            return idea;
+        },
+        seeOutcome: (vote1, vote2, vote3) => {
+            alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+        }
+        });
+        setLoading(false);
+    }
+}
+```
+In the function above, we
+1. connect to the user's wallet and get an account.
+2. use the account we get from the user's wallet to deploy the contract and then get the contract id.
+3. send our idea to the contract and set the `seeOutcome` interact function to display the outcome of the votes.
+
+The last thing we need to do for this screen is to return the react components that will be rendered in our `DeployScreen` function, which are the loader, the input field for our idea and the button to deploy the contract.
+Below is the full code for our `DeployScreen.js`
+```js
+import logo from './logo.svg';
+import './App.css';
+import './loader.css'
+import * as backend from "./contract.mjs";
+import { useState } from 'react';
+
+function DeployScreen(props) {
+    console.log(props)
+
+    const [idea, setIdea] = useState("");
+    const [contractId, setContractId] = useState(undefined);
+    const [loading, setLoading] = useState(false);
+    const handleDeployClicked = async() => {
+        setLoading(true);
+        const {account, stdlib} = await props.connectToWallet();
+        const ctc = account.contract(backend);
+        ctc.getInfo().then((info) => {
+            setContractId(info.toNumber());
+        });
+        await ctc.p.Proposer1({
+            proposeIdea: ()=>{
+            return idea;
+        },
+        seeOutcome: (vote1, vote2, vote3) => {
+            alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+        }
+        });
+        setLoading(false);
+    }
+  return (
+    <div>
+    <div className="my-body">
+       {contractId? <p className='info-text'>Contract Id: {contractId}</p>: null}
+       {loading ?<div className='loader'></div>: null}
+        <input className='action-input'  placeholder='Idea' value={idea} onChange={(event)=> setIdea(event.target.value)} />
+        <button className='action-button' onClick={handleDeployClicked}> Deploy </button>
+    </div>
+    </div>
+  );
+}
+export default DeployScreen;
+```
+
+## Step 4 Second Proposer's screen
+The purpose of this screen is very similar to the first because both screens interact with the frontend in a similar way by proposing an idea, the two participants also have the same interact functions, so their frontends are really alike. Let's call this screen `ProposeIdeaScreen`, we start with our imports as usual below:
+```js
+import logo from './logo.svg';
+import './App.css';
+import { useState } from 'react';
+import './loader.css'
+import * as backend from "./contract.mjs";
+```
+then we proceed to declare the function for our React component that will be rendered as well as it's state variables(the state variables are the same as the one from our ` DeployScreen.js`), let's call this function `ProposeIdeaScreen`
+```js
+function ProposeIdeaScreen(props){
+      const [contractId, setContractId] = useState(0);
+  const [idea, setIdea] = useState("");
+  const [loading, setLoading] = useState(false);
+}
+```
+Next, we have to declare the function that connects this participant to the already deployed contract, we declare the function below, it simply connects to the user's account and sends the interactive functions to propose an idea and also see the outcome of the contract. Let's call the function `handleProposeButton`
+```js
+function ProposeIdeaScreen(props){
+      const [contractId, setContractId] = useState(0);
+  const [idea, setIdea] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleProposeButton = async() => {
+    if(contractId == 0){
+      alert("contract id cannot be zero");
+      return
+    }
+    setLoading(true);
+    const {account, stdlib} = await props.connectToWallet();
+    const ctc = account.contract(backend, contractId);
+    await ctc.p.Proposer2({
+      proposeIdea: ()=>{
+      return idea;
+  },
+  seeOutcome: (vote1, vote2, vote3) => {
+      alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+  }
+  });
+  setLoading(false);
+  }
+}
+```
+Lastly, we need to return the react components that will be rendered by our ProposeIdeaScreen function. We need
+1. A progress bar
+2. An input that the frontend will receive the contract id from
+3. An input that the frontend will receive the idea from
+4. A Propose idea button
+
+Below is the full code for our `ProposeIdeaScreen.js` file
+```js
+import logo from './logo.svg';
+import './App.css';
+import { useState } from 'react';
+import './loader.css'
+import * as backend from "./contract.mjs";
+
+function ProposeIdeaScreen(props) {
+
+  const [contractId, setContractId] = useState(0);
+  const [idea, setIdea] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleProposeButton = async() => {
+    if(contractId == 0){
+      alert("contract id cannot be zero");
+      return
+    }
+    setLoading(true);
+    const {account, stdlib} = await props.connectToWallet();
+    const ctc = account.contract(backend, contractId);
+    await ctc.p.Proposer2({
+      proposeIdea: ()=>{
+      return idea;
+  },
+  seeOutcome: (vote1, vote2, vote3) => {
+      alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+  }
+  });
+  setLoading(false);
+  }
+  return (
+    <div className="my-body">
+        <input className='action-input' value={contractId} placeholder='Contract id' onChange={(event) => setContractId(event.target.value)}/>
+        {loading ?<div className='loader'></div>: null}
+        <input className='action-input' placeholder='Idea'  value={idea} onChange={(event) => setIdea(event.target.value)} />
+        <button className='action-button' onClick={handleProposeButton}> Propose </button>
+
+    </div>
+  );
+}
+
+export default ProposeIdeaScreen;
+```
+
+## Step 5 First Investor Screen
+This screen is responsible for the frontend of the first investor of the contract, this screen will allow a participant to
+1. View the proposed ideas
+2. Pay funds into the contract
+3. Vote on the proposed Ideas
+
+Let's create a file and call it `InitialInvestorScreen.js`, as usual, we declare our imports below in the file:
+```js
+import logo from './logo.svg';
+import './App.css';
+import './loader.css'
+import * as backend from "./contract.mjs";
+import { useState } from 'react';
+```
+So let's move further by declaring the React component function that will be rendered to the screen, let's call it `InitialInvestorScreen` and also declare our state variables. we need the following state variables for this function:
+1. The idea that the investor has voted for
+2. The contract id of the deployed contract we want to connect to
+3. The loading variable to dictate when to display the progress bar
+4. the funds variable to dictate the amount of funds to pay into the contract(Note that it is the first investor that dictates the amount that should be paid into the contract)
+5. The ideas that have been proposed in the contract
+6. A resolve function from a promise to indicate that execution can continue in the contract.
+
+Below are the state variables
+```js
+const [idea, setIdea] = useState("");
+    const [contractId, setContractId] = useState(undefined);
+    const [loading, setLoading] = useState(false);
+    const [funds, setFunds] = useState(0);
+    const [ideas, setIdeas] = useState("");
+    const [resolveVote, setResolveVote] = useState(undefined)
+```
+
+Next, we need to declare the function that will be used to get the ideas that have been proposed in the contract so that the Investor can know the idea he intends to vote for, let's call this function `handleGetIdeas`. Below is the declaration for this function
+```js
+const handleGetIdeas = async() => {
+    if(contractId == 0){
+      alert("contract id cannot be zero");
+      return
+    }
+    setLoading(true);
+    const {account, stdlib} = await props.connectToWallet();
+    const ctc = account.contract(backend, contractId);
+    await ctc.p.user1({
+      funds: stdlib.parseCurrency(parseInt(funds)),
+      deadline: 100000,
+    viewIdeas: (idea1, idea2) => {
+      console.log(idea2)
+      setIdeas(`1. ${idea1} \n 2. ${idea2}`);
+      console.log(`${ideas} \n 2. ${idea2}`);
+    },
+
+    voteIdea: async() =>  new Promise((resolve, reject) => {
+      console.log("resolve", resolve);
+      setResolveVote(() => resolve)
+    }),
+    seeOutcome: (vote1, vote2, vote3) => {
+        alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+    }
+  })
+  setLoading(false);
+  }
+```
+The function above could be a little bit confusing since it's supposed to only get ideas but it contains a lot of code. This is because we are using an interactive function to view the ideas, but the thing to note is that the result of the `voteIdea`
+interact function is an unresolved promise, and the `viewIdeas` function sets the ideas gotten to state and this is then displayed on the frontend browser in an HTML button.
+
+### Note: The best way to read information from a Reach contract is through [Views](https://docs.reach.sh/rsh/consensus/#ref-programs-consensus-view)
+
+so we also have to implement a function that is called to resolve the promise of our voteIdea function so reach does not get stocked and program execution can continue in our Reach contract. The purpose of using an unresolved promise is to ensure that the user can interact with buttons and input fields on the front end before allowing the Reach program execution to continue, let's call this function `handleFundContract` because it funds the contract and sends our vote.
+```js
+  const handleFundContract = async() => {
+    console.log("resolveVote", resolveVote)
+    resolveVote(idea)
+  }
+```
+All that remains now for this screen is to actually return the react components that will be rendered to the screen, they are simply:
+1. An input field to receive the contract id from
+2. An input field for the funds to be paid into the contract
+3. A connect to contract button
+4. A text field that shows the proposed ideas
+5. An input field that sets the idea that the investor intends to vote for
+6. A vote button
+
+the full code for our `InvestorScreen3.js` file can be found below
+```js
+import logo from './logo.svg';
+import './App.css';
+import './loader.css'
+import * as backend from "./contract.mjs";
+import { useState } from 'react';
+
+
+function InitialInvestorScreen(props) {
+  const [idea, setIdea] = useState("");
+    const [contractId, setContractId] = useState(undefined);
+    const [loading, setLoading] = useState(false);
+    const [funds, setFunds] = useState(0);
+    const [ideas, setIdeas] = useState("");
+    const [resolveVote, setResolveVote] = useState(undefined)
+    const [resolveFunds, setResolveFunds] = useState(undefined);
+  const handleGetIdeas = async() => {
+    if(contractId == 0){
+      alert("contract id cannot be zero");
+      return
+    }
+    setLoading(true);
+    const {account, stdlib} = await props.connectToWallet();
+    const ctc = account.contract(backend, contractId);
+    await ctc.p.user1({
+      funds: stdlib.parseCurrency(parseInt(funds)),
+      deadline: 100000,
+    viewIdeas: (idea1, idea2) => {
+      console.log(idea2)
+      setIdeas(`1. ${idea1} \n 2. ${idea2}`);
+      console.log(`${ideas} \n 2. ${idea2}`);
+    },
+
+    voteIdea: async() =>  new Promise((resolve, reject) => {
+      console.log("resolve", resolve);
+      setResolveVote(() => resolve)
+    }),
+    seeOutcome: (vote1, vote2, vote3) => {
+        alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+    }
+  })
+  setLoading(false);
+  }
+
+  const handleFundContract = async() => {
+    console.log("resolveVote", resolveVote)
+    resolveVote(idea)
+    // resolveFunds(parseInt(funds));
+  }
+  return (
+    <div className="my-body">
+      {loading ?<div className='loader'></div>: null}
+        <input className='action-input' placeholder='Contract id' value={contractId} onChange={(event) => setContractId(event.target.value)}/>
+        <input className='action-input' placeholder='Amount of funds' value={funds} onChange={(event)=> setFunds(event.target.value)}/>
+        <button className='action-button' onClick={handleGetIdeas}> Connect to contract </button>
+        <p className='list-of-ideas'>{ideas}</p>
+        <input className='action-input' placeholder='Idea'  value={idea} onChange={(event)=> setIdea(event.target.value)} />
+        <button className='action-button' onClick={handleFundContract}> Fund contract </button>
+
+    </div>
+  );
+}
+
+export default InitialInvestorScreen;
+```
+
+### Step 6 Second Investor's screen
+This screen is for the second investor and it is basically the same as that of the first investor just that there is no funds property sent from the frontend into the contract since the contract already has the funds that each investor will pay.We call this file `InvestorScreen.js`, The code for this screen can be found below:
+
+```js
+import logo from './logo.svg';
+import './App.css';
+import './loader.css'
+import * as backend from "./contract.mjs";
+import { useState } from 'react';
+
+
+function InvestorScreen(props) {
+  const [idea, setIdea] = useState("");
+  const [ideas, setIdeas] = useState("");
+  const [contractId, setContractId] = useState(undefined);
+  const [loading, setLoading] = useState(false);
+  const [resolveVote, setResolveVote] = useState(undefined)
+
+  const handleGetIdeas = async() => {
+    if(contractId == 0){
+      alert("contract id cannot be zero");
+      return
+    }
+    setLoading(true);
+    const {account, stdlib} = await props.connectToWallet();
+    const ctc = account.contract(backend, contractId);
+    await ctc.p.user2({
+      accepFunds: async (amt) => {
+        console.log(`user2 pays ${(amt)} to the network`);
+    },
+    viewIdeas: (idea1, idea2) => {
+      console.log(idea2)
+      setIdeas(`1. ${idea1} \n 2. ${idea2}`);
+      console.log(`${ideas} \n 2. ${idea2}`);
+    },
+    voteIdea: async() =>  new Promise((resolve, reject) => {
+      console.log("resolve", resolve);
+      setResolveVote(() => resolve)
+    }),
+    seeOutcome: (vote1, vote2, vote3) => {
+        alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+    }
+  })
+  setLoading(false);
+  }
+
+
+  const handleFundContract = async() => {
+    resolveVote(idea);
+  }
+  return (
+    <div className="my-body">
+      {loading ?<div className='loader'></div>: null}
+        <input className='action-input' placeholder='Contract id'  value={contractId}  onChange={(event) => setContractId(event.target.value)}/>
+        <button className='action-button' onClick={handleGetIdeas}> Get list of ideas </button>
+        <p>{ideas}</p>
+        <input className='action-input' placeholder='Idea'   value={idea} onChange={(event)=> setIdea(event.target.value)} />
+        <button className='action-button' onClick={handleFundContract} > Fund contract </button>
+
+    </div>
+  );
+}
+
+export default InvestorScreen;
+```
+
+### Step 7 Last Investor's screen
+This is also the same as the second investor's screen since their interact functions are the same, the code for this screen can be found below:
+```js
+import logo from './logo.svg';
+import './App.css';
+import './loader.css'
+import * as backend from "./contract.mjs";
+import { useState } from 'react';
+
+
+function InvestorScreen3(props) {
+  const [idea, setIdea] = useState("");
+  const [ideas, setIdeas] = useState("");
+  const [contractId, setContractId] = useState(undefined);
+  const [loading, setLoading] = useState(false);
+  const [resolveVote, setResolveVote] = useState(undefined)
+
+  const handleGetIdeas = async() => {
+    if(contractId == 0){
+      alert("contract id cannot be zero");
+      return
+    }
+    setLoading(true);
+    const {account, stdlib} = await props.connectToWallet();
+    const ctc = account.contract(backend, contractId);
+    await ctc.p.user3({
+      accepFunds: async (amt) => {
+        console.log(`user2 pays ${(amt)} to the network`);
+    },
+    viewIdeas: (idea1, idea2) => {
+      console.log(idea2)
+      setIdeas(`1. ${idea1} \n 2. ${idea2}`);
+      console.log(`${ideas} \n 2. ${idea2}`);
+    },
+    voteIdea: async() =>  new Promise((resolve, reject) => {
+      console.log("resolve", resolve);
+      setResolveVote(() => resolve)
+    }),
+    seeOutcome: (vote1, vote2, vote3) => {
+        alert(`votes were ${vote1}, ${vote2}, ${vote3}`)
+    }
+  })
+  setLoading(false);
+  }
+
+  const handleFundContract = async() => {
+    resolveVote(idea);
+  }
+  return (
+    <div className="my-body">
+      {loading ?<div className='loader'></div>: null}
+        <input className='action-input' placeholder='Contract id'  value={contractId}  onChange={(event) => setContractId(event.target.value)}/>
+        <button className='action-button' onClick={handleGetIdeas}> Get list of ideas </button>
+        <p>{ideas}</p>
+        <input className='action-input' placeholder='Idea'   value={idea} onChange={(event)=> setIdea(event.target.value)} />
+        <button className='action-button' onClick={handleFundContract} > Fund contract </button>
+
+    </div>
+  );
+}
+
+export default InvestorScreen3;
+```
+
+### Step 8 The initial screen
+We have all our participant screens presently but we need a screen that joins them together, the code for this screen will replace the code in our `App.js` file.
+So far, we have been using `props.connectToWallet` function but we have not yet declared this function, that is because we will declare this function only once in our App.js and then pass it onto our Participant screens. first, delete all the code in our App.js file and replace it with the imports below:
+
+```JS
+import logo from './logo.svg';
+import './App.css';
+import DeployScreen from './DeployerScreen';
+import InvestorScreen from './InvestorScreen';
+import ProposeIdeaScreen from './ProposeIdeaScreen';
+import InitialInvestorScreen from './InitialInvestorScreen';
+import InvestorScreen3 from './InvestorScreen3';
+import { useState } from 'react';
+import { loadStdlib } from '@reach-sh/stdlib';
+import {ALGO_MyAlgoConnect as MyAlgoConnect} from '@reach-sh/stdlib';
+```
+Next, let us declare our App function that will be rendered by React:
+```js
+function App(){
+
+}
+```
+Now, will be a good time to declare our `connectToWallet` function
+the  function simply:
+1. initializes the reach standard library.
+2. sets the connector to the algorand blockchain and the network to Test net
+3. sets our wallet as the myalgoconnect
+4. Gets the default account
+5. returns the default account and the initialized reach standard library
+
+
+the function can be found below:
+```js
+  const connectToWallet = async() => {
+    const stdlib = loadStdlib("ALGO");
+    stdlib.setWalletFallback(
+      stdlib.walletFallback({
+        providerEnv: 'TestNet', MyAlgoConnect
+      })
+    );
+    const account = await stdlib.getDefaultAccount();
+    return{account, stdlib};
+  }
+```
+The next step is to actually display the buttons that will take a user to each of the participant screens, which is done below
+```js
+
+  const LoadScreen = ( <div className="my-body">
+  <button className='action-button' onClick={() => gotoScreen(pages.deployerScreen)}>Deployer</button>
+  <button className='action-button' onClick={() => gotoScreen(pages.ProposeIdeaScreen)}> Proposer </button>
+  <button className='action-button' onClick={() => gotoScreen(pages.initialInvestorScreen)}>Initial Investor</button>
+  <button className='action-button' onClick={() => gotoScreen(pages.investorScreen)}>Investor 2</button>
+  <button className='action-button' onClick={() => gotoScreen(pages.investorScreen3)}>Investor 3</button>
+</div>);
+```
+Next, we create an object and assign each screen in the project to certain keys so we don't have to use longer declaration of the participant screen react components.
+```js
+  const pages ={
+    deployerScreen: (<div>
+      <DeployScreen connectToWallet = {connectToWallet} ></DeployScreen>
+    </div>),
+    investorScreen: (<div>
+      <InvestorScreen  connectToWallet = {connectToWallet}  ></InvestorScreen>
+    </div>),
+    ProposeIdeaScreen: (<div>
+      <ProposeIdeaScreen connectToWallet = {connectToWallet}></ProposeIdeaScreen>
+    </div>),
+    initialInvestorScreen: (<div>
+      <InitialInvestorScreen connectToWallet = {connectToWallet}></InitialInvestorScreen>
+    </div>),
+    investorScreen3: (<div>
+      <InvestorScreen3 connectToWallet = {connectToWallet}></InvestorScreen3>
+    </div>),
+    loadScreen: LoadScreen
+  }
+```
+lastly, we create a state variable that is used to decide which screen to display on the webpage as well as the `gotoScreen` function that allows navigation to different screens by changing the `screen` state variable
+```js
+const [screen, setScreen] = useState(pages.loadScreen)
+const gotoScreen = (newScreen) => {
+  setScreen(newScreen)
+
+}
+```
+
+The full code for our App.js file can be found below:
+```js
+import logo from './logo.svg';
+import './App.css';
+import DeployScreen from './DeployerScreen';
+import InvestorScreen from './InvestorScreen';
+import ProposeIdeaScreen from './ProposeIdeaScreen';
+import InitialInvestorScreen from './InitialInvestorScreen';
+import InvestorScreen3 from './InvestorScreen3';
+import { useState } from 'react';
+import { loadStdlib } from '@reach-sh/stdlib';
+import {ALGO_MyAlgoConnect as MyAlgoConnect} from '@reach-sh/stdlib';
+function App() {
+
+  const connectToWallet = async() => {
+    const stdlib = loadStdlib("ALGO");
+    stdlib.setWalletFallback(
+      stdlib.walletFallback({
+        providerEnv: 'TestNet', MyAlgoConnect
+      })
+    );
+    const account = await stdlib.getDefaultAccount();
+    return{account, stdlib};
+  }
+
+  const LoadScreen = ( <div className="my-body">
+  <button className='action-button' onClick={() => gotoScreen(pages.deployerScreen)}>Deployer</button>
+  <button className='action-button' onClick={() => gotoScreen(pages.ProposeIdeaScreen)}> Proposer </button>
+  <button className='action-button' onClick={() => gotoScreen(pages.initialInvestorScreen)}>Initial Investor</button>
+  <button className='action-button' onClick={() => gotoScreen(pages.investorScreen)}>Investor 2</button>
+  <button className='action-button' onClick={() => gotoScreen(pages.investorScreen3)}>Investor 3</button>
+</div>);
+  const pages ={
+    deployerScreen: (<div>
+      <DeployScreen connectToWallet = {connectToWallet} ></DeployScreen>
+    </div>),
+    investorScreen: (<div>
+      <InvestorScreen  connectToWallet = {connectToWallet}  ></InvestorScreen>
+    </div>),
+    ProposeIdeaScreen: (<div>
+      <ProposeIdeaScreen connectToWallet = {connectToWallet}></ProposeIdeaScreen>
+    </div>),
+    initialInvestorScreen: (<div>
+      <InitialInvestorScreen connectToWallet = {connectToWallet}></InitialInvestorScreen>
+    </div>),
+    investorScreen3: (<div>
+      <InvestorScreen3 connectToWallet = {connectToWallet}></InvestorScreen3>
+    </div>),
+    loadScreen: LoadScreen
+  }
+const [screen, setScreen] = useState(pages.loadScreen)
+const gotoScreen = (newScreen) => {
+  setScreen(newScreen)
+
+}
+  return (
+    screen
+  );
+}
+
+export default App;
+```
+
+That is all for our code, you can now proceed to run `npm start` to start a react server and display the code we have written so far.
+
+
+# Conclusion
+Thanks for fearlessly taking your time to go through this workshop, you are indeed braver than the fairest knight. You can always check out the [Reach docs](https://docs.reach.sh/#reach-top) for more information and resources on developing Reach dapps
